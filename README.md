@@ -167,10 +167,10 @@ variables after logging in.
 
 ## Known limitations / not implemented
 
+- No web UI/Blade views — this is API-only, per the brief.
 - No automated tests (PHPUnit/Pest) are included — add feature tests
-  per controller if this goes further than a take-home exercise.
-- No rate limiting beyond Laravel's defaults is configured.
+  per controller if this goes further 
 - No soft deletes; deleting a category/product/movement is permanent.
 - Reporting is limited to low-stock and stock-in/out totals; no
   CSV/PDF export.
-- No web UI/Blade views — this is API-only, per the brief.
+
