@@ -3,14 +3,20 @@
 A REST API for managing products, categories, and stock movements, with
 token-based auth and role-based authorization (Admin / Staff).
 
-## About this deliverable
+## About deliverable
 
 This repo contains the **application-layer source code** — migrations,
 models, controllers, form requests, API resources, policies, routes,
-factories, and seeders. It's built to drop into a fresh Laravel 11
-installation. It was generated without a live PHP/Composer environment, so
-it hasn't been executed — read it over before relying on it, and expect to
-fix the odd typo.
+factories, and seeders. It has also enlists known limitations 
+
+## API Documentation
+
+This project includes the following API resources:
+
+- **API Documentation:** `API_DOCUMENTATION.md`
+- **Postman Collection:** `postman_collection.json`
+
+Import the Postman collection into Postman Desktop and set the required environment variables (`base_url` and `token`) to test all endpoints.
 
 ## 1. Create the base Laravel project
 
@@ -123,11 +129,11 @@ This is enforced via Laravel Policies (`app/Policies`), registered in
 All routes below are prefixed with `/api/v1` and require
 `Authorization: Bearer <token>` unless noted otherwise.
 
-| Method | Endpoint | Notes |
-|---|---|---|
-| POST | `/register` | Public |
-| POST | `/login` | Public |
-| POST | `/logout` | |
+| Method | Endpoint     | Notes |
+|----|---|--------------|
+| POST   | `/register`  | Public |
+| POST   | `/login`     | Public |
+| POST   | `/logout`      | |
 | GET | `/me` | |
 | GET | `/categories` | Paginated |
 | POST | `/categories` | Admin only |
