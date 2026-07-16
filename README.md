@@ -1,182 +1,307 @@
-# Inventory Management System (Laravel API)
+# Inventory Management System API
 
-A REST API for managing products, categories, and stock movements, with
-token-based auth and role-based authorization (Admin / Staff).
+A RESTful Inventory Management System built with **Laravel 12** that provides secure authentication, category and product management, stock movement tracking, and inventory reporting. The API uses **Laravel Sanctum** for authentication and follows RESTful design principles.
 
-## About deliverable
+---
 
-This repo contains the **application-layer source code** — migrations,
-models, controllers, form requests, API resources, policies, routes,
-factories, and seeders. It has also enlists known limitations 
+## Features
 
-## API Documentation
+- User Authentication (Laravel Sanctum)
+- Role-Based Authorization (Admin & Staff)
+- Category Management (CRUD)
+- Product Management (CRUD)
+- Stock Movement Tracking
+- Low Stock Report
+- Movement Summary Report
+- Form Request Validation
+- API Resources
+- RESTful API Design
 
-This project includes the following API resources:
+---
 
-- **API Documentation:** `API_DOCUMENTATION.md`
-- **Postman Collection:** `postman_collection.json`
+## Technology Stack
 
-Import the Postman collection into Postman Desktop and set the required environment variables (`base_url` and `token`) to test all endpoints.
+- Laravel 12
+- PHP 8.x
+- MySQL
+- Laravel Sanctum
+- REST API
+- Postman
 
-## 1. Create the base Laravel project
+---
+
+## Project Structure
+
+```
+Inventory-Management-System
+│
+├── app
+│   ├── Http
+│   │   ├── Controllers
+│   │   ├── Requests
+│   │   ├── Resources
+│   │   └── Middleware
+│   ├── Models
+│   └── Policies
+│
+├── database
+│   ├── factories
+│   ├── migrations
+│   └── seeders
+│
+├── routes
+│   └── api.php
+│
+├── README.md
+├── API_DOCUMENTATION.md
+├── postman_collection.json
+└── composer.json
+```
+
+---
+
+## Installation
+
+### Clone Repository
 
 ```bash
-composer create-project laravel/laravel inventory-management
-cd inventory-management
-composer require laravel/sanctum
-php artisan install:api
+git clone https://github.com/nidanoor18/Inventory-Management-System.git
+
+cd Inventory-Management-System
 ```
 
-`php artisan install:api` publishes Sanctum's config, adds the
-`personal_access_tokens` migration, and switches on API routing
-(creates `routes/api.php` if it doesn't already exist).
+---
 
-## 2. Copy in the files from this delivery
+### Install Dependencies
 
-Copy each file from this project into the matching path in your new
-Laravel project, overwriting where a file already exists:
-
-```
-app/Http/Controllers/Controller.php
-app/Http/Controllers/Api/V1/AuthController.php
-app/Http/Controllers/Api/V1/CategoryController.php
-app/Http/Controllers/Api/V1/ProductController.php
-app/Http/Controllers/Api/V1/StockMovementController.php
-app/Http/Controllers/Api/V1/ReportController.php
-app/Http/Requests/*.php
-app/Http/Resources/*.php
-app/Models/User.php            (replaces the default one)
-app/Models/Category.php
-app/Models/Product.php
-app/Models/StockMovement.php
-app/Policies/*.php
-app/Providers/AppServiceProvider.php  (replaces the default one)
-database/migrations/2024_01_01_*.php
-database/factories/UserFactory.php     (replaces the default one)
-database/factories/CategoryFactory.php
-database/factories/ProductFactory.php
-database/seeders/*.php
-routes/api.php                 (replaces the generated one)
-.env.example                   (merge with the one Laravel generated)
+```bash
+composer install
 ```
 
-## 3. Configure the environment
+---
+
+### Configure Environment
+
+Copy the environment file.
 
 ```bash
 cp .env.example .env
+```
+
+Generate the application key.
+
+```bash
 php artisan key:generate
 ```
 
-Edit `.env` and set your MySQL credentials (`DB_DATABASE`, `DB_USERNAME`,
-`DB_PASSWORD`). Create the database itself first, e.g.:
+Configure your MySQL database inside `.env`.
 
-```sql
-CREATE DATABASE inventory_system CHARACTER SET utf8mb4;
+```env
+DB_DATABASE=inventory_management
+DB_USERNAME=root
+DB_PASSWORD=
 ```
 
-## 4. Run migrations and seed data
+---
+
+### Run Migrations
 
 ```bash
-php artisan migrate --seed
+php artisan migrate
 ```
 
-This creates all tables and seeds:
+If your project includes seeders:
 
-- An admin user: `admin@example.com` / `password`
-- A staff user: `staff@example.com` / `password`
-- 5 categories, each with ~8 products (2 of which are deliberately
-  below their reorder level, for testing the low-stock report)
+```bash
+php artisan migrate:fresh --seed
+```
 
-## 5. Run the app
+---
+
+### Start the Server
 
 ```bash
 php artisan serve
 ```
 
-The API is now available at `http://localhost:8000/api/v1`.
+The API will be available at:
+
+```
+http://127.0.0.1:8000
+```
+
+---
+
+# API Base URL
+
+```
+http://127.0.0.1:8000/api/v1
+```
+
+---
 
 ## Authentication
 
-Token-based via Sanctum. Register or log in to get a bearer token, then
-send it as `Authorization: Bearer <token>` on every subsequent request.
+This project uses **Laravel Sanctum**.
+
+Include the following header for protected routes.
+
+```http
+Authorization: Bearer YOUR_ACCESS_TOKEN
+Accept: application/json
+```
+
+---
+
+# API Endpoints
+
+## Authentication
+
+| Method | Endpoint | Description |
+|---------|----------|-------------|
+| POST | /register | Register User |
+| POST | /login | Login |
+| POST | /logout | Logout |
+| GET | /me | Authenticated User |
+
+---
+
+## Categories
+
+| Method | Endpoint | Description |
+|---------|----------|-------------|
+| GET | /categories | List Categories |
+| POST | /categories | Create Category |
+| GET | /categories/{id} | Show Category |
+| PUT | /categories/{id} | Update Category |
+| DELETE | /categories/{id} | Delete Category (Admin Only) |
+
+---
+
+## Products
+
+| Method | Endpoint | Description |
+|---------|----------|-------------|
+| GET | /products | List Products |
+| POST | /products | Create Product |
+| GET | /products/{id} | Show Product |
+| PUT | /products/{id} | Update Product |
+| DELETE | /products/{id} | Delete Product (Admin Only) |
+
+---
+
+## Stock Movements
+
+| Method | Endpoint | Description |
+|---------|----------|-------------|
+| GET | /stock-movements | List Stock Movements |
+| POST | /stock-movements | Record Stock Movement |
+| GET | /stock-movements/{id} | Show Stock Movement |
+| DELETE | /stock-movements/{id} | Delete Stock Movement |
+
+---
+
+## Reports
+
+| Method | Endpoint | Description |
+|---------|----------|-------------|
+| GET | /reports/low-stock | Low Stock Products |
+| GET | /reports/movement-summary | Stock Movement Summary |
+
+---
+
+## Running the API
+
+Start the Laravel development server.
+
+```bash
+php artisan serve
+```
+
+Open Postman and import:
 
 ```
-POST /api/v1/register   { name, email, password, password_confirmation }
-POST /api/v1/login      { email, password }
-POST /api/v1/logout     (auth required)
-GET  /api/v1/me         (auth required)
+Inventory_Management_API.postman_collection.json
 ```
 
-New self-registrations are always created with the `staff` role. To create
-an admin, either use the seeded `admin@example.com` account or update a
-user's `role` column directly (`php artisan tinker` → `User::find(1)->update(['role' => 'admin'])`).
+Update the collection variables.
 
-## Authorization model
+```
+base_url = http://127.0.0.1:8000/api/v1
 
-- **Everyone authenticated** can view categories, products, stock
-  movements, and reports.
-- **Staff and Admin** can create/update products and record stock
-  movements (this is the day-to-day job).
-- **Admin only** can create/update/delete categories, delete products,
-  and delete stock movements (destructive or structural changes).
+token = YOUR_ACCESS_TOKEN
+```
 
-This is enforced via Laravel Policies (`app/Policies`), registered in
-`AppServiceProvider`, and checked either inside Form Requests
-(`authorize()`) or explicitly with `$this->authorize()` in controllers.
+Login first to obtain a Sanctum token, then test all protected endpoints.
 
-## API endpoints
+---
 
-All routes below are prefixed with `/api/v1` and require
-`Authorization: Bearer <token>` unless noted otherwise.
+## Authentication Workflow
 
-| Method | Endpoint     | Notes |
-|----|---|--------------|
-| POST   | `/register`  | Public |
-| POST   | `/login`     | Public |
-| POST   | `/logout`      | |
-| GET | `/me` | |
-| GET | `/categories` | Paginated |
-| POST | `/categories` | Admin only |
-| GET | `/categories/{id}` | |
-| PUT/PATCH | `/categories/{id}` | Admin only |
-| DELETE | `/categories/{id}` | Admin only; blocked if it still has products |
-| GET | `/products` | Filters: `search`, `category_id`, `low_stock` |
-| POST | `/products` | |
-| GET | `/products/{id}` | |
-| PUT/PATCH | `/products/{id}` | |
-| DELETE | `/products/{id}` | Admin only |
-| GET | `/stock-movements` | Filters: `product_id`, `type`, `from`, `to` |
-| POST | `/stock-movements` | Adjusts product quantity atomically; `type` is `in` or `out` |
-| GET | `/stock-movements/{id}` | |
-| DELETE | `/stock-movements/{id}` | Admin only; reverses the quantity change |
-| GET | `/reports/low-stock` | Products at or below reorder level |
-| GET | `/reports/movement-summary` | Stock-in vs stock-out totals; filters: `product_id`, `from`, `to` |
+1. Register a new user.
+2. Login to receive an API token.
+3. Add the token to the Authorization header.
+4. Access protected endpoints.
+5. Logout to invalidate the token.
 
-A ready-to-import Postman collection is included at
-`postman_collection.json`. Set the `base_url` and `token` collection
-variables after logging in.
+---
 
-## Design notes
+## Reports
 
-- **Stock changes are transactional.** `StockMovementController@store`
-  locks the product row, checks for sufficient quantity on `out`
-  movements, and updates `products.quantity` in the same DB transaction
-  as the movement record — no race conditions between two people
-  recording stock at once.
-- **Low-stock is a query scope**, not a stored flag, so it's always
-  accurate: `Product::lowStock()` returns products where
-  `quantity <= reorder_level`.
-- **Roles are a single enum column** on `users` (`admin` / `staff`)
-  rather than a full permissions package, since the brief only calls
-  for two roles. Swapping in `spatie/laravel-permission` later would
-  mean changing the Policies, not the controllers.
+The API provides two inventory reports.
 
-## Known limitations / not implemented
+### Low Stock Report
 
-- No web UI/Blade views — this is API-only, per the brief.
-- No automated tests (PHPUnit/Pest) are included — add feature tests
-  per controller if this goes further 
-- No soft deletes; deleting a category/product/movement is permanent.
-- Reporting is limited to low-stock and stock-in/out totals; no
-  CSV/PDF export.
+Returns products whose available quantity is less than or equal to the reorder level.
 
+### Movement Summary
+
+Provides a summary of stock-in and stock-out transactions.
+
+---
+
+## HTTP Status Codes
+
+| Code | Description |
+|------|-------------|
+| 200 | OK |
+| 201 | Created |
+| 204 | Deleted |
+| 400 | Bad Request |
+| 401 | Unauthorized |
+| 403 | Forbidden |
+| 404 | Not Found |
+| 422 | Validation Error |
+| 500 | Internal Server Error |
+
+---
+
+## Documentation
+
+The project includes the following documentation.
+
+- **README.md**
+- **API_DOCUMENTATION.md**
+- **postman_collection.json**
+
+---
+
+## Future Improvements
+
+- Unit & Feature Testing
+- CSV/PDF Report Export
+- Dashboard UI
+- Product Image Upload
+- Pagination & Filtering
+- Docker Deployment
+
+---
+
+## Author
+
+**Nida Noor**
+
+
+Laravel Backend Developer Training Task
+
+---
