@@ -1,58 +1,176 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Inventory Management System (Laravel API)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A REST API for managing products, categories, and stock movements, with
+token-based auth and role-based authorization (Admin / Staff).
 
-## About Laravel
+## About this deliverable
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+This repo contains the **application-layer source code** — migrations,
+models, controllers, form requests, API resources, policies, routes,
+factories, and seeders. It's built to drop into a fresh Laravel 11
+installation. It was generated without a live PHP/Composer environment, so
+it hasn't been executed — read it over before relying on it, and expect to
+fix the odd typo.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
-
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## 1. Create the base Laravel project
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+composer create-project laravel/laravel inventory-management
+cd inventory-management
+composer require laravel/sanctum
+php artisan install:api
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+`php artisan install:api` publishes Sanctum's config, adds the
+`personal_access_tokens` migration, and switches on API routing
+(creates `routes/api.php` if it doesn't already exist).
 
-## Contributing
+## 2. Copy in the files from this delivery
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Copy each file from this project into the matching path in your new
+Laravel project, overwriting where a file already exists:
 
-## Code of Conduct
+```
+app/Http/Controllers/Controller.php
+app/Http/Controllers/Api/V1/AuthController.php
+app/Http/Controllers/Api/V1/CategoryController.php
+app/Http/Controllers/Api/V1/ProductController.php
+app/Http/Controllers/Api/V1/StockMovementController.php
+app/Http/Controllers/Api/V1/ReportController.php
+app/Http/Requests/*.php
+app/Http/Resources/*.php
+app/Models/User.php            (replaces the default one)
+app/Models/Category.php
+app/Models/Product.php
+app/Models/StockMovement.php
+app/Policies/*.php
+app/Providers/AppServiceProvider.php  (replaces the default one)
+database/migrations/2024_01_01_*.php
+database/factories/UserFactory.php     (replaces the default one)
+database/factories/CategoryFactory.php
+database/factories/ProductFactory.php
+database/seeders/*.php
+routes/api.php                 (replaces the generated one)
+.env.example                   (merge with the one Laravel generated)
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## 3. Configure the environment
 
-## Security Vulnerabilities
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Edit `.env` and set your MySQL credentials (`DB_DATABASE`, `DB_USERNAME`,
+`DB_PASSWORD`). Create the database itself first, e.g.:
 
-## License
+```sql
+CREATE DATABASE inventory_system CHARACTER SET utf8mb4;
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## 4. Run migrations and seed data
+
+```bash
+php artisan migrate --seed
+```
+
+This creates all tables and seeds:
+
+- An admin user: `admin@example.com` / `password`
+- A staff user: `staff@example.com` / `password`
+- 5 categories, each with ~8 products (2 of which are deliberately
+  below their reorder level, for testing the low-stock report)
+
+## 5. Run the app
+
+```bash
+php artisan serve
+```
+
+The API is now available at `http://localhost:8000/api/v1`.
+
+## Authentication
+
+Token-based via Sanctum. Register or log in to get a bearer token, then
+send it as `Authorization: Bearer <token>` on every subsequent request.
+
+```
+POST /api/v1/register   { name, email, password, password_confirmation }
+POST /api/v1/login      { email, password }
+POST /api/v1/logout     (auth required)
+GET  /api/v1/me         (auth required)
+```
+
+New self-registrations are always created with the `staff` role. To create
+an admin, either use the seeded `admin@example.com` account or update a
+user's `role` column directly (`php artisan tinker` → `User::find(1)->update(['role' => 'admin'])`).
+
+## Authorization model
+
+- **Everyone authenticated** can view categories, products, stock
+  movements, and reports.
+- **Staff and Admin** can create/update products and record stock
+  movements (this is the day-to-day job).
+- **Admin only** can create/update/delete categories, delete products,
+  and delete stock movements (destructive or structural changes).
+
+This is enforced via Laravel Policies (`app/Policies`), registered in
+`AppServiceProvider`, and checked either inside Form Requests
+(`authorize()`) or explicitly with `$this->authorize()` in controllers.
+
+## API endpoints
+
+All routes below are prefixed with `/api/v1` and require
+`Authorization: Bearer <token>` unless noted otherwise.
+
+| Method | Endpoint | Notes |
+|---|---|---|
+| POST | `/register` | Public |
+| POST | `/login` | Public |
+| POST | `/logout` | |
+| GET | `/me` | |
+| GET | `/categories` | Paginated |
+| POST | `/categories` | Admin only |
+| GET | `/categories/{id}` | |
+| PUT/PATCH | `/categories/{id}` | Admin only |
+| DELETE | `/categories/{id}` | Admin only; blocked if it still has products |
+| GET | `/products` | Filters: `search`, `category_id`, `low_stock` |
+| POST | `/products` | |
+| GET | `/products/{id}` | |
+| PUT/PATCH | `/products/{id}` | |
+| DELETE | `/products/{id}` | Admin only |
+| GET | `/stock-movements` | Filters: `product_id`, `type`, `from`, `to` |
+| POST | `/stock-movements` | Adjusts product quantity atomically; `type` is `in` or `out` |
+| GET | `/stock-movements/{id}` | |
+| DELETE | `/stock-movements/{id}` | Admin only; reverses the quantity change |
+| GET | `/reports/low-stock` | Products at or below reorder level |
+| GET | `/reports/movement-summary` | Stock-in vs stock-out totals; filters: `product_id`, `from`, `to` |
+
+A ready-to-import Postman collection is included at
+`postman_collection.json`. Set the `base_url` and `token` collection
+variables after logging in.
+
+## Design notes
+
+- **Stock changes are transactional.** `StockMovementController@store`
+  locks the product row, checks for sufficient quantity on `out`
+  movements, and updates `products.quantity` in the same DB transaction
+  as the movement record — no race conditions between two people
+  recording stock at once.
+- **Low-stock is a query scope**, not a stored flag, so it's always
+  accurate: `Product::lowStock()` returns products where
+  `quantity <= reorder_level`.
+- **Roles are a single enum column** on `users` (`admin` / `staff`)
+  rather than a full permissions package, since the brief only calls
+  for two roles. Swapping in `spatie/laravel-permission` later would
+  mean changing the Policies, not the controllers.
+
+## Known limitations / not implemented
+
+- No automated tests (PHPUnit/Pest) are included — add feature tests
+  per controller if this goes further than a take-home exercise.
+- No rate limiting beyond Laravel's defaults is configured.
+- No soft deletes; deleting a category/product/movement is permanent.
+- Reporting is limited to low-stock and stock-in/out totals; no
+  CSV/PDF export.
+- No web UI/Blade views — this is API-only, per the brief.
